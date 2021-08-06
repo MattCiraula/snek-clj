@@ -6,9 +6,12 @@
   (:gen-class))
 
 ;; TODO: make apples never generate in snake
+;;       make all state atomic
 ;;       handle boundaries
+;;       make apples never spawn next to border
 ;;       speed up game with time
 ;;       polish UI
+;;       center game in frame
 ;;       refactor to be more functional?
 
 (def VK_LEFT (java.awt.event.KeyEvent/VK_LEFT))
@@ -16,7 +19,6 @@
 (def VK_UP (java.awt.event.KeyEvent/VK_UP))
 (def VK_DOWN (java.awt.event.KeyEvent/VK_DOWN))
 (def VK_SPACE (java.awt.event.KeyEvent/VK_SPACE))
-(def VK_Q (java.awt.event.KeyEvent/VK_Q))
 (def VK_H (java.awt.event.KeyEvent/VK_H))
 (def VK_J (java.awt.event.KeyEvent/VK_J))
 (def VK_K (java.awt.event.KeyEvent/VK_K))
@@ -32,7 +34,7 @@
 ;; TODO: change this to an atom
 (def apple-blocks #{})
 (def allow-keypress? (atom true))
-(def apple-odds 50)
+(def apple-odds 25)
 (def max-apples 8)
 (def max-apple-loc 38)
 (def score (atom 0))
@@ -76,7 +78,6 @@
 (defn generate-apple
   []
   (when (and (< (count apple-blocks) max-apples) (= 0 (rand-int apple-odds)))
-    ;; 8 * 0-37 gives us an apple anywhere from [0 0] to [296 296]
     (def apple-blocks
       (conj apple-blocks (random-apple-loc)))))
 
@@ -112,8 +113,10 @@
       (proxy-super paintComponent g)
       (doseq [block snek-blocks]
         (draw-block g block Color/GREEN))
-    (doseq [apple apple-blocks]
-        (draw-apple g apple Color/RED)))
+      (doseq [apple apple-blocks]
+          (draw-apple g apple Color/RED))
+      (.setColor g Color/BLUE)
+      (.drawRect g 0 0 304 304))
     (keyPressed [e]
       (handle-keypress (.getKeyCode e)))
     (keyReleased [e]
@@ -130,8 +133,14 @@
       (when (apple-blocks (last snek-blocks))
         (swap! score inc)
         (reset! grow-snek? true)
+        (reset! speed (- @speed 3))
         (def apple-blocks (disj apple-blocks (last snek-blocks))))
-      (when ((set (subvec snek-blocks 0 (dec (count snek-blocks)))) (last snek-blocks))
+      (when (or (< (first (last snek-blocks)) 0)
+                (< (second (last snek-blocks)) 0)
+                (>= (first (last snek-blocks)) 304)
+                (>= (second (last snek-blocks)) 304)
+                ((set (subvec snek-blocks 0 (dec (count snek-blocks))))
+                 (last snek-blocks)))
         (println "score: " @score)
         (reset-game-state))
       (.repaint snek)
