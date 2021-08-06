@@ -1,4 +1,4 @@
-(ns clj-conda.core
+(ns snek-clj.core
   (:import (java.awt Color Dimension) 
 	         (javax.swing JPanel JFrame Timer JOptionPane JButton)
            (java.awt.event ActionListener KeyListener)
