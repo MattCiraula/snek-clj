@@ -1,6 +1,6 @@
 (ns snek-clj.core
-  (:import (java.awt Color Dimension) 
-	         (javax.swing JPanel JFrame Timer JOptionPane JButton)
+  (:import (java.awt Color Dimension)
+           (javax.swing JPanel JFrame Timer JOptionPane JButton)
            (java.awt.event ActionListener KeyListener)
            (java.lang Thread))
   (:gen-class))
@@ -114,7 +114,7 @@
       (doseq [block snek-blocks]
         (draw-block g block Color/GREEN))
       (doseq [apple apple-blocks]
-          (draw-apple g apple Color/RED))
+        (draw-apple g apple Color/RED))
       (.setColor g Color/BLUE)
       (.drawRect g 0 0 304 304))
     (keyPressed [e]
@@ -146,7 +146,7 @@
       (.repaint snek)
       (reset! allow-keypress? true)
       (Thread/sleep @speed))
-      (recur)))
+    (recur)))
 
 (defn -main
   [& args]
@@ -161,5 +161,4 @@
       (.add snek)
       (.setSize 400 500)
       (.setVisible true))
-      (game-loop snek)
-    ))
+    (game-loop snek)))
