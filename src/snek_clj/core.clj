@@ -148,7 +148,7 @@
     (recur)))
 
 (defn -main
-  [& args]
+  [& _args]
   (let [snek (draw-snek)
         frame (JFrame. "no step on snek")]
     (reset-game-state)
