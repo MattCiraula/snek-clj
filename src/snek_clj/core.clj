@@ -29,10 +29,10 @@
 (def speed (atom 100))
 (def paused? (atom true))
 ;; TODO: change this to an atom
-(def snek-blocks [[16 16] [24 16] [32 16] [40 16]])
+(def snek-blocks (atom [[16 16] [24 16] [32 16] [40 16]]))
 (def grow-snek? (atom false))
 ;; TODO: change this to an atom
-(def apple-blocks #{})
+(def apple-blocks (atom #{}))
 (def allow-keypress? (atom true))
 (def apple-odds 25)
 (def max-apples 8)
@@ -49,8 +49,8 @@
   (reset! allow-keypress? true)
   (reset! paused? true)
   (reset! direction :right)
-  (def apple-blocks (hash-set (random-apple-loc) (random-apple-loc) (random-apple-loc)))
-  (def snek-blocks [[16 16] [24 16] [32 16] [40 16]])
+  (reset! apple-blocks (hash-set (random-apple-loc) (random-apple-loc) (random-apple-loc)))
+  (reset! snek-blocks [[16 16] [24 16] [32 16] [40 16]])
   (reset! speed 100))
 
 (defn handle-keypress
@@ -77,13 +77,12 @@
 
 (defn generate-apple
   []
-  (when (and (< (count apple-blocks) max-apples) (= 0 (rand-int apple-odds)))
-    (def apple-blocks
-      (conj apple-blocks (random-apple-loc)))))
+  (when (and (< (count @apple-blocks) max-apples) (= 0 (rand-int apple-odds)))
+    (swap! apple-blocks conj (random-apple-loc))))
 
 (defn move-snek
   []
-  (let [body (if @grow-snek? snek-blocks (subvec snek-blocks 1))
+  (let [body (if @grow-snek? @snek-blocks (subvec @snek-blocks 1))
         old-head (last body)
         old-x (first old-head)
         old-y (second old-head)
@@ -92,7 +91,7 @@
                    :left  [(- old-x block-size) old-y]
                    :down  [old-x (+ old-y block-size)]
                    :up    [old-x (- old-y block-size)])]
-    (def snek-blocks (conj body new-head))
+    (reset! snek-blocks (conj body new-head))
     (reset! grow-snek? false)))
 
 (defn draw-block [g [x y] color]
@@ -111,9 +110,9 @@
   (proxy [JPanel KeyListener] []
     (paintComponent [g]
       (proxy-super paintComponent g)
-      (doseq [block snek-blocks]
+      (doseq [block @snek-blocks]
         (draw-block g block Color/GREEN))
-      (doseq [apple apple-blocks]
+      (doseq [apple @apple-blocks]
         (draw-apple g apple Color/RED))
       (.setColor g Color/BLUE)
       (.drawRect g 0 0 304 304))
@@ -130,17 +129,17 @@
       (generate-apple)
       (move-snek)
       ;; check for overlaps with apples / body
-      (when (apple-blocks (last snek-blocks))
+      (when (@apple-blocks (last @snek-blocks))
         (swap! score inc)
         (reset! grow-snek? true)
         (reset! speed (- @speed 3))
-        (def apple-blocks (disj apple-blocks (last snek-blocks))))
-      (when (or (< (first (last snek-blocks)) 0)
-                (< (second (last snek-blocks)) 0)
-                (>= (first (last snek-blocks)) 304)
-                (>= (second (last snek-blocks)) 304)
-                ((set (subvec snek-blocks 0 (dec (count snek-blocks))))
-                 (last snek-blocks)))
+        (swap! apple-blocks disj (last @snek-blocks)))
+      (when (or (< (first (last @snek-blocks)) 0)
+                (< (second (last @snek-blocks)) 0)
+                (>= (first (last @snek-blocks)) 304)
+                (>= (second (last @snek-blocks)) 304)
+                ((set (subvec @snek-blocks 0 (dec (count @snek-blocks))))
+                 (last @snek-blocks)))
         (println "score: " @score)
         (reset-game-state))
       (.repaint snek)
