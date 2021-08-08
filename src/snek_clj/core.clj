@@ -1,7 +1,7 @@
 (ns snek-clj.core
-  (:import (java.awt Color Dimension)
-           (javax.swing JPanel JFrame Timer JOptionPane JButton)
-           (java.awt.event ActionListener KeyListener)
+  (:import (java.awt Color)
+           (javax.swing JPanel JFrame)
+           (java.awt.event KeyListener)
            (java.lang Thread))
   (:gen-class))
 
