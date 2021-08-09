@@ -6,10 +6,7 @@
   (:gen-class))
 
 ;; TODO: make apples never generate in snake
-;;       make all state atomic
-;;       handle boundaries
 ;;       make apples never spawn next to border
-;;       speed up game with time
 ;;       polish UI
 ;;       center game in frame
 ;;       refactor to be more functional?
